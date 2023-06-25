@@ -1,0 +1,60 @@
+#Задаем переменные для Gitea, его можно вообще полностью настроить через env
+#Кстати стоит отметить что GITEA__actions__ENABLED и отвечает за CI
+#Важно указывать адрес по которому будет идти непосредственно обращение к Gitea
+
+statefulset:
+  env:
+  - name: GITEA__actions__ENABLED
+    value: "true"
+  - name: GITEA__server__ROOT_URL
+    value: "http://192.168.1.227:32339"
+  - name: GITEA__server__SSH_DOMAIN
+    value: "192.168.1.227"
+  - name: GITEA__server__DOMAIN
+    value: "192.168.1.227"
+
+#Настройка Storage для Gitea
+persistence:
+  enabled: true
+  existingClaim:
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  labels: {}
+  annotations: {}
+  storageClass:
+  subPath:
+
+#Админский пароль, задается при первом разворачивании
+gitea:
+  admin:
+    # existingSecret: gitea-admin-secret
+    existingSecret:
+    username: gitea_admin
+    password: pomenya_parol
+    email: "gitea@local.domain"
+
+#Настройки базы
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        password: gitea
+        database: gitea
+        username: gitea
+      service:
+        ports:
+          postgresql: 5432
+  primary:
+    persistence:
+      size: 10Gi
+
+#Порт http и ssh по которому можно будет подключиться к gitea
+service:
+  http:
+    type: NodePort
+    nodePort: 32339
+  ssh:
+    type: NodePort
+    nodePort: 32338

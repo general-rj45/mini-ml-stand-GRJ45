@@ -1,0 +1,41 @@
+# Файл deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+        - name: mlflow-server
+          image: "{{ .Values.mlflow.image }}:{{ .Values.mlflow.tag }}"
+          ports:
+            - containerPort: 5000
+          command: 
+            - sh
+            - -c
+            - |
+              mlflow server \
+              --host 0.0.0.0 \
+              --port 5000 \
+              --serve-artifacts \
+              --artifacts-destination "{{ .Values.s3.s3ArtifactRoot }}" \
+              --backend-store-uri "postgresql+psycopg2://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.url }}:{{ .Values.database.port }}/{{ .Values.database.db_name }}" \
+              --registry-store-uri "postgresql+psycopg2://{{ .Values.database.username }}:{{ .Values.database.password }}@{{ .Values.database.url }}:{{ .Values.database.port }}/{{ .Values.database.db_name }}" \
+          env:
+            - name: MLFLOW_S3_ENDPOINT_URL
+              value: "{{ .Values.s3.MLFLOW_S3_ENDPOINT_URL }}"
+            - name: AWS_ACCESS_KEY_ID
+              value: "{{ .Values.s3.accessKey }}"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "{{ .Values.s3.secretKey }}"
+            - name: MLFLOW_S3_IGNORE_TLS
+              value: "{{ .Values.s3.MLFLOW_S3_IGNORE_TLS }}"

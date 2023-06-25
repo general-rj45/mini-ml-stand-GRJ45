@@ -1,0 +1,9 @@
+apiVersion : v2
+name       : gitea-act-runner
+type       : application
+version    : 0.1
+appVersion : 0.0
+helm.sh/resource-policy: "keep"
+
+maintainers:
+ - name: General RJ-45

@@ -1,0 +1,31 @@
+name: myapp
+on:
+  push:
+    branches:
+      - main
+jobs:
+  docker:
+    runs-on: self-hosted
+    steps:
+      - name: Run kubectl apply
+        env:
+          SECRET_GIT_USER: ${{ secrets.SECRET_GIT_USER }}
+          SECRET_GIT_PASSWORD: ${{ secrets.SECRET_GIT_PASSWORD }}
+        run: |
+          GIT_REPO_GITEA=$(echo "$GITHUB_REPOSITORY" | sed -e 's/\//-/g' -e 's/_/-/g')
+          kubectl run -it build-$GIT_REPO_GITEA-$GITHUB_RUN_NUMBER \
+          --image=generalrj45/kaniko-git-bash:v0.4 \
+          --env="NAME_IMAGE=192.168.1.227:32339/$GITHUB_REPOSITORY" \
+          --env="NAME_TAG=$GITHUB_RUN_NUMBER" \
+          --env="GIT_URL=http://$SECRET_GIT_USER:$SECRET_GIT_PASSWORD@192.168.1.227:32339/$GITHUB_REPOSITORY.git" \
+          --env="GIT_USERNAME=$SECRET_GIT_USER" \
+          --env="GIT_PASSWORD=$SECRET_GIT_PASSWORD" \
+          --env="REGISTRY_USERNAME=$SECRET_GIT_USER" \
+          --env="REGISTRY_PASSWORD=$SECRET_GIT_PASSWORD" \
+          --env="REGISTRY_URL=http://192.168.1.227:32339" \
+          --restart=OnFailure
+      - name: Delete pod
+        run: |
+          GIT_REPO_GITEA=$(echo "$GITHUB_REPOSITORY" | sed -e 's/\//-/g' -e 's/_/-/g')
+          kubectl delete pod build-$GIT_REPO_GITEA-$GITHUB_RUN_NUMBER
+  

@@ -1,0 +1,99 @@
+auth:
+  username: "generalrj45"
+  password: "pomenya_parol"
+
+git:
+  image:
+    registry: docker.io
+    repository: bitnami/git
+    tag: 2.36.0-debian-10-r3
+  dags:
+    enabled: true
+    repositories:
+      - repository: http://gitea_admin:pomenya_parol@192.168.1.227:32339/gitea_admin/best-repo-ci.git
+        branch: main
+        name: example-dags-sync
+        path: /dags/
+  clone:
+    extraEnvVars:
+    - name: GIT_SSL_NO_VERIFY
+      value: "1"
+    resources: {}
+  sync:
+    interval: 60
+    command: []
+    args: []
+    extraVolumeMounts: []
+    extraEnvVars:
+    - name: GIT_SSL_NO_VERIFY
+      value: "1"
+
+serviceAccount:
+  ## @param serviceAccount.create Enable creation of ServiceAccount for Airflow pods
+  ##
+  create: true
+
+executor: KubernetesExecutor
+
+rbac:
+  create: true
+
+#Порт для подключения
+service:
+  type: NodePort
+  nodePorts:
+    http: 32222
+
+#Настройка базы постгрес
+postgresql:
+  enabled: true
+  auth:
+    enablePostgresUser: false
+    username: bn_airflow
+    password: "lolkekcheburek"
+    database: bitnami_airflow
+    existingSecret: ""
+  architecture: standalone
+
+#настройка редиса
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    ## Redis&reg; password (both master and slave). Defaults to a random 10-character alphanumeric string if not set and auth.enabled is true.
+    ## It should always be set using the password value or in the existingSecret to avoid issues
+    ## with Airflow.
+    ## The password value is ignored if existingSecret is set
+    password: "lolkekcheburek2"
+    existingSecret: ""
+  architecture: standalone
+
+web:
+  extraVolumeMounts:
+    - name: airflow-logs
+      mountPath: /opt/bitnami/airflow/logs
+
+  extraVolumes:
+    - name: airflow-logs
+      persistentVolumeClaim: 
+        claimName: airflow-logs
+
+scheduler:
+  extraVolumeMounts:
+    - name: airflow-logs
+      mountPath: /opt/bitnami/airflow/logs
+
+  extraVolumes:
+    - name: airflow-logs
+      persistentVolumeClaim: 
+        claimName: airflow-logs
+        
+worker:
+  extraVolumeMounts:
+    - name: airflow-logs
+      mountPath: /opt/bitnami/airflow/logs
+
+  extraVolumes:
+    - name: airflow-logs
+      persistentVolumeClaim: 
+        claimName: airflow-logs

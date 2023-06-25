@@ -1,0 +1,33 @@
+mlflow:
+  image: generalrj45/mlflow-psycopg2 
+  tag: v2.4.1-r2 
+  port: 8080
+  NodePort: 32226
+  serviceType: NodePort
+  username: mlflow
+  password: "{SHA}Z/xepKPsTx+MJw81WnDgIoGtZo8="
+
+s3:
+  MLFLOW_S3_ENDPOINT_URL: "http://minio.minio:9000"
+  s3ArtifactRoot: "s3://mlflow/"
+  accessKey: "mlflow" 
+  secretKey: "pomenya_parol"
+  MLFLOW_S3_IGNORE_TLS: false
+
+database:
+  port: 5432
+  url: "mlflow-postgresql"
+  username: "mlflow"
+  password: "pomenya_parol"
+  db_name: "mlflow"
+
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+  postgresql:
+    auth:
+      postgresPassword: ""
+      username: "mlflow"
+      password: "pomenya_parol"
+      database: "mlflow"

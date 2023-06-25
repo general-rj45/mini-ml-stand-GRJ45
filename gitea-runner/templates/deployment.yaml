@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-gitea-act-runner
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-gitea-act-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-gitea-act-runner
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-gitea-act-runner
+    spec:
+      containers:
+      - name: gitea-act-runner
+        image: {{ .Values.deployment.image }}
+        securityContext:
+          privileged: {{ .Values.deployment.privileged }}
+        resources:
+          requests:
+            memory: {{ .Values.deployment.resources.requests.memory }}
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.deployment.resources.limits.memory }}
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+        env:
+        - name: GITEA_HOST
+          value: {{ .Values.config.GITEA_HOST }}
+        - name: GITEA_TOKEN
+          value: {{ .Values.config.GITEA_TOKEN }}
+
+        volumeMounts:
+          - name: gitea-data-runner
+            mountPath: /runner/data
+      serviceAccountName: {{ .Release.Name }}-{{ .Values.ServiceAccount }}
+      volumes:
+      - name: gitea-data-runner
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-{{ .Values.pvc.name }}

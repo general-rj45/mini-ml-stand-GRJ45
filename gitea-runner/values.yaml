@@ -1,0 +1,25 @@
+deployment:
+  #need to enable privileges for Docker in Docker
+  #image: ocker.io/generalrj45/gitea-kubernetes-runner:v0.11
+  image: docker.io/generalrj45/gitea-act-runner-shell-k8s-kubectl:v0.3
+  resources:
+    requests:
+      memory: "500Mi"
+      cpu: "250m"
+    limits:
+      memory: "10000Mi"
+      cpu: "4000m"
+    privileged: false
+    
+config:
+  #хост и токен для подключения к gitea
+  GITEA_HOST: http://192.168.1.227:32339
+  GITEA_TOKEN: yjaFdN5YxzEwKWpkusl4jsLZ1Dks7o1Em6HFvSCa
+
+#storage для хранения данных раннера и подключения
+pvc:
+  name: gitea-data-runner
+  size: 5G
+  storageClassName: local-path
+
+ServiceAccount: gitea-runner-service-account
